@@ -95,9 +95,58 @@ Syndmarq/
 │   ├── package.json
 │   └── vite.config.ts
 │
+├── docs/
+│   └── screenshots/
+│
 ├── .gitignore
 └── README.md
 ```
+
+---
+
+## Capturas del avance
+
+### Dashboard
+
+Vista principal desde la cual el usuario puede consultar el estado general de su portafolio.
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Perfil profesional
+
+Sección para administrar la información profesional del usuario.
+
+![Perfil profesional](docs/screenshots/perfil.png)
+
+### Gestión de proyectos
+
+Módulo para registrar, editar y administrar los proyectos que serán exhibidos en el portafolio.
+
+![Gestión de proyectos](docs/screenshots/proyectos.png)
+
+### Gestión de enlaces
+
+Sección para administrar los enlaces profesionales del usuario.
+
+![Gestión de enlaces](docs/screenshots/enlaces.png)
+
+### Personalización del diseño
+
+El usuario puede seleccionar diferentes temas visuales para personalizar la presentación de su portafolio.
+
+![Diseño](docs/screenshots/diseno.png)
+
+### Estadísticas
+
+Módulo para consultar las visitas recibidas y la actividad de los últimos siete días.
+
+![Estadísticas](docs/screenshots/estadisticas.png)
+
+### Portafolio público
+
+Vista pública en la que se exhibe la información profesional, los proyectos y los enlaces del usuario.
+
+![Portafolio público](docs/screenshots/portafolio-publico.png)
 
 ---
 
