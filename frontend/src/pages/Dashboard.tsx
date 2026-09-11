@@ -201,12 +201,20 @@ function Dashboard() {
             </button>
 
             <button
-               onClick={() =>
+              onClick={() =>
+                navigate("/share")
+              }
+            >
+              Compartir
+            </button>
+
+            <button
+              onClick={() =>
                 navigate("/settings")
-             }
+              }
             >
               Configuración
-        </button>
+            </button>
           </nav>
         </div>
 

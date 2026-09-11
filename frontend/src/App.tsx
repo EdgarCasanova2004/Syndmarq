@@ -15,6 +15,7 @@ import PublicPortfolio from "./pages/PublicPortfolio";
 import Design from "./pages/Design";
 import Statistics from "./pages/Statistics";
 import Settings from "./pages/Settings";
+import Share from "./pages/Share";
 
 function App() {
   return (
@@ -68,6 +69,11 @@ function App() {
         <Route
           path="/settings"
           element={<Settings />}
+        />
+
+        <Route
+          path="/share"
+          element={<Share />}
         />
 
         <Route
