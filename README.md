@@ -1,18 +1,16 @@
-# Syndmarq
+# Plataforma Web de Portafolio Profesional
 
-## Plataforma Web de Portafolio Profesional
+## Desarrollo de una Plataforma Web para la Centralización y Exhibición de Proyectos Profesionales como Herramienta de Marca Personal
 
-Syndmarq es una plataforma web orientada a profesionales, estudiantes y freelancers que permite crear, administrar y compartir un portafolio profesional mediante un enlace público.
+Proyecto desarrollado para **Syndmarq** como parte del proceso de Residencias Profesionales.
 
-El proyecto se encuentra actualmente en desarrollo como parte de mis Residencias Profesionales.
-
----
+La plataforma tiene como objetivo centralizar y exhibir proyectos profesionales en un solo espacio digital, permitiendo a los usuarios crear un perfil profesional, organizar sus proyectos, agregar enlaces y compartir su trabajo mediante un portafolio público.
 
 ## Estado del proyecto
 
 **Proyecto en desarrollo**
 
-Actualmente se han implementado los módulos principales de la plataforma y se continúa trabajando en nuevas funcionalidades.
+Actualmente se encuentran implementados los principales módulos de la plataforma y se continúa trabajando en nuevas funcionalidades.
 
 ### Funcionalidades implementadas
 
@@ -99,3 +97,28 @@ Syndmarq/
 │
 ├── .gitignore
 └── README.md
+```
+
+---
+
+## Autor
+
+**Edgar Uriel De La Cruz Casanova**
+
+Ingeniería en Sistemas Computacionales
+
+Proyecto de Residencias Profesionales
+
+---
+
+## Empresa
+
+**Syndmarq**
+
+Proyecto desarrollado para Syndmarq como parte del proceso de Residencias Profesionales.
+
+---
+
+## Nombre del proyecto
+
+**Desarrollo de una Plataforma Web para la Centralización y Exhibición de Proyectos Profesionales como Herramienta de Marca Personal**
