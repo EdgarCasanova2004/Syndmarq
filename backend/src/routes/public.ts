@@ -15,7 +15,8 @@ router.get("/:username", async (req, res) => {
         username,
         profession,
         bio,
-        theme
+        theme,
+        profile_image_url
       FROM users
       WHERE username = $1
       `,
@@ -81,6 +82,7 @@ router.get("/:username", async (req, res) => {
         profession: user.profession,
         bio: user.bio,
         theme: user.theme || "default",
+        profile_image_url: user.profile_image_url,
       },
       projects: projectsResult.rows,
       links: linksResult.rows,

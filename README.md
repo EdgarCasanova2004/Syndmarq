@@ -71,36 +71,6 @@ Actualmente se encuentran implementados los principales módulos de la plataform
 - GitHub
 - PostgreSQL / psql
 
----
-
-## Estructura general
-
-```text
-Syndmarq/
-│
-├── backend/
-│   ├── src/
-│   │   ├── routes/
-│   │   ├── db.ts
-│   │   └── server.ts
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── frontend/
-│   ├── src/
-│   │   ├── pages/
-│   │   ├── assets/
-│   │   ├── App.tsx
-│   │   └── App.css
-│   ├── package.json
-│   └── vite.config.ts
-│
-├── docs/
-│   └── screenshots/
-│
-├── .gitignore
-└── README.md
-```
 
 ---
 

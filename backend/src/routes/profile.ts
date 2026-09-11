@@ -27,7 +27,14 @@ router.get("/", async (req, res) => {
 
     const result = await pool.query(
       `
-      SELECT id, name, email, username, profession, bio
+      SELECT
+        id,
+        name,
+        email,
+        username,
+        profession,
+        bio,
+        profile_image_url
       FROM users
       WHERE id = $1
       `,
@@ -73,7 +80,12 @@ router.put("/", async (req, res) => {
       username: string;
     };
 
-    const { name, profession, bio } = req.body;
+    const {
+      name,
+      profession,
+      bio,
+      profileImageUrl,
+    } = req.body;
 
     if (!name) {
       return res.status(400).json({
@@ -84,16 +96,26 @@ router.put("/", async (req, res) => {
     const result = await pool.query(
       `
       UPDATE users
-      SET name = $1,
-          profession = $2,
-          bio = $3
-      WHERE id = $4
-      RETURNING id, name, email, username, profession, bio
+      SET
+        name = $1,
+        profession = $2,
+        bio = $3,
+        profile_image_url = $4
+      WHERE id = $5
+      RETURNING
+        id,
+        name,
+        email,
+        username,
+        profession,
+        bio,
+        profile_image_url
       `,
       [
         name,
         profession || null,
         bio || null,
+        profileImageUrl || null,
         decoded.id,
       ]
     );

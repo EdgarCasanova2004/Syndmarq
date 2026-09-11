@@ -8,6 +8,7 @@ interface PublicUser {
   profession: string | null;
   bio: string | null;
   theme: string;
+  profile_image_url: string | null;
 }
 
 interface PublicProject {
@@ -174,9 +175,18 @@ function PublicPortfolio() {
     >
       <section className="public-profile">
         <div className="public-avatar">
-          {data.user.name
-            .charAt(0)
-            .toUpperCase()}
+          {data.user.profile_image_url ? (
+            <img
+              src={
+                data.user.profile_image_url
+              }
+              alt={`Foto de ${data.user.name}`}
+            />
+          ) : (
+            data.user.name
+              .charAt(0)
+              .toUpperCase()
+          )}
         </div>
 
         <h1>

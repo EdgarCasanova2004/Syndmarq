@@ -1,5 +1,18 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
+
+interface DashboardUser {
+  id?: number;
+  name: string;
+  email?: string;
+  username: string;
+  profession?: string | null;
+  bio?: string | null;
+  profile_image_url?: string | null;
+}
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -13,35 +26,64 @@ function Dashboard() {
   const [visitCount, setVisitCount] =
     useState(0);
 
+  const [user, setUser] =
+    useState<DashboardUser | null>(null);
+
   const token =
     localStorage.getItem("token");
 
-  const userData =
-    localStorage.getItem("user");
-
-  const user =
-    userData
-      ? JSON.parse(userData)
-      : null;
-
   useEffect(() => {
-    if (!token || !user) {
+    const storedUser =
+      localStorage.getItem("user");
+
+    if (!token || !storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const parsedUser =
+        JSON.parse(storedUser);
+
+      setUser(parsedUser);
+    } catch (error) {
+      console.error(error);
+
+      localStorage.removeItem(
+        "token"
+      );
+
+      localStorage.removeItem(
+        "user"
+      );
+
       navigate("/login");
     }
-  }, [token, user, navigate]);
+  }, [token, navigate]);
 
   useEffect(() => {
-    const loadCounts = async () => {
+    const loadDashboard = async () => {
       if (!token) {
         return;
       }
 
       try {
         const [
+          profileResponse,
           projectsResponse,
           linksResponse,
           statisticsResponse,
         ] = await Promise.all([
+          fetch(
+            "http://localhost:3000/api/profile",
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          ),
+
           fetch(
             "http://localhost:3000/api/projects",
             {
@@ -74,6 +116,7 @@ function Dashboard() {
         ]);
 
         if (
+          profileResponse.status === 401 ||
           projectsResponse.status === 401 ||
           linksResponse.status === 401 ||
           statisticsResponse.status === 401
@@ -91,6 +134,9 @@ function Dashboard() {
           return;
         }
 
+        const profileData =
+          await profileResponse.json();
+
         const projectsData =
           await projectsResponse.json();
 
@@ -99,6 +145,22 @@ function Dashboard() {
 
         const statisticsData =
           await statisticsResponse.json();
+
+        if (
+          profileResponse.ok &&
+          profileData.user
+        ) {
+          setUser(
+            profileData.user
+          );
+
+          localStorage.setItem(
+            "user",
+            JSON.stringify(
+              profileData.user
+            )
+          );
+        }
 
         if (projectsResponse.ok) {
           setProjectCount(
@@ -122,7 +184,7 @@ function Dashboard() {
       }
     };
 
-    loadCounts();
+    loadDashboard();
   }, [token, navigate]);
 
   const handleLogout = () => {
@@ -138,6 +200,10 @@ function Dashboard() {
   };
 
   const handleViewPortfolio = () => {
+    if (!user) {
+      return;
+    }
+
     navigate(
       `/u/${user.username}`
     );
@@ -194,7 +260,9 @@ function Dashboard() {
 
             <button
               onClick={() =>
-                navigate("/statistics")
+                navigate(
+                  "/statistics"
+                )
               }
             >
               Estadísticas
@@ -210,7 +278,9 @@ function Dashboard() {
 
             <button
               onClick={() =>
-                navigate("/settings")
+                navigate(
+                  "/settings"
+                )
               }
             >
               Configuración
@@ -220,7 +290,9 @@ function Dashboard() {
 
         <button
           className="logout-button"
-          onClick={handleLogout}
+          onClick={
+            handleLogout
+          }
         >
           Cerrar sesión
         </button>
@@ -240,9 +312,18 @@ function Dashboard() {
 
           <div className="dashboard-user">
             <div className="dashboard-avatar">
-              {user.name
-                .charAt(0)
-                .toUpperCase()}
+              {user.profile_image_url ? (
+                <img
+                  src={
+                    user.profile_image_url
+                  }
+                  alt={`Foto de ${user.name}`}
+                />
+              ) : (
+                user.name
+                  .charAt(0)
+                  .toUpperCase()
+              )}
             </div>
 
             <div>
@@ -344,7 +425,7 @@ function Dashboard() {
             </p>
 
             <strong>
-              syndmarq.com/{user.username}
+              /u/{user.username}
             </strong>
           </div>
 
