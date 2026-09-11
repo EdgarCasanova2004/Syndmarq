@@ -200,9 +200,13 @@ function Dashboard() {
               Estadísticas
             </button>
 
-            <button>
+            <button
+               onClick={() =>
+                navigate("/settings")
+             }
+            >
               Configuración
-            </button>
+        </button>
           </nav>
         </div>
 

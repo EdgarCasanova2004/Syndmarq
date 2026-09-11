@@ -10,6 +10,7 @@ import linkRoutes from "./routes/links.js";
 import publicRoutes from "./routes/public.js";
 import designRoutes from "./routes/design.js";
 import statisticsRoutes from "./routes/statistics.js";
+import settingsRoutes from "./routes/settings.js";
 
 dotenv.config();
 
@@ -54,6 +55,11 @@ app.use(
 app.use(
   "/api/statistics",
   statisticsRoutes
+);
+
+app.use(
+  "/api/settings",
+  settingsRoutes
 );
 
 app.get("/", (_req, res) => {
