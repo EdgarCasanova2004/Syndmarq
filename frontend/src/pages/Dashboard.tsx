@@ -12,6 +12,7 @@ interface DashboardUser {
   profession?: string | null;
   bio?: string | null;
   profile_image_url?: string | null;
+  role?: string;
 }
 
 function Dashboard() {
@@ -32,6 +33,18 @@ function Dashboard() {
   const token =
     localStorage.getItem("token");
 
+  const closeSession = () => {
+    localStorage.removeItem(
+      "token"
+    );
+
+    localStorage.removeItem(
+      "user"
+    );
+
+    navigate("/login");
+  };
+
   useEffect(() => {
     const storedUser =
       localStorage.getItem("user");
@@ -49,15 +62,7 @@ function Dashboard() {
     } catch (error) {
       console.error(error);
 
-      localStorage.removeItem(
-        "token"
-      );
-
-      localStorage.removeItem(
-        "user"
-      );
-
-      navigate("/login");
+      closeSession();
     }
   }, [token, navigate]);
 
@@ -115,22 +120,22 @@ function Dashboard() {
           ),
         ]);
 
-        if (
-          profileResponse.status === 401 ||
-          projectsResponse.status === 401 ||
-          linksResponse.status === 401 ||
-          statisticsResponse.status === 401
-        ) {
-          localStorage.removeItem(
-            "token"
+        const responses = [
+          profileResponse,
+          projectsResponse,
+          linksResponse,
+          statisticsResponse,
+        ];
+
+        const sessionInvalid =
+          responses.some(
+            (response) =>
+              response.status === 401 ||
+              response.status === 403
           );
 
-          localStorage.removeItem(
-            "user"
-          );
-
-          navigate("/login");
-
+        if (sessionInvalid) {
+          closeSession();
           return;
         }
 
@@ -150,14 +155,45 @@ function Dashboard() {
           profileResponse.ok &&
           profileData.user
         ) {
-          setUser(
-            profileData.user
-          );
+          let storedRole:
+            | string
+            | undefined;
+
+          const storedUser =
+            localStorage.getItem(
+              "user"
+            );
+
+          if (storedUser) {
+            try {
+              const parsedUser =
+                JSON.parse(
+                  storedUser
+                );
+
+              storedRole =
+                parsedUser.role;
+            } catch (error) {
+              console.error(
+                error
+              );
+            }
+          }
+
+          const updatedUser = {
+            ...profileData.user,
+
+            role:
+              profileData.user.role ??
+              storedRole,
+          };
+
+          setUser(updatedUser);
 
           localStorage.setItem(
             "user",
             JSON.stringify(
-              profileData.user
+              updatedUser
             )
           );
         }
@@ -188,15 +224,7 @@ function Dashboard() {
   }, [token, navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem(
-      "token"
-    );
-
-    localStorage.removeItem(
-      "user"
-    );
-
-    navigate("/login");
+    closeSession();
   };
 
   const handleViewPortfolio = () => {
@@ -285,6 +313,19 @@ function Dashboard() {
             >
               Configuración
             </button>
+
+            {user.role ===
+              "admin" && (
+              <button
+                onClick={() =>
+                  navigate(
+                    "/admin"
+                  )
+                }
+              >
+                Administración
+              </button>
+            )}
           </nav>
         </div>
 

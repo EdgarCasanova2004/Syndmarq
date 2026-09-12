@@ -30,6 +30,7 @@ router.get(
             email,
             username,
             role,
+            is_active,
             created_at
           FROM users
           ORDER BY created_at DESC
@@ -110,6 +111,7 @@ router.put(
             email,
             username,
             role,
+            is_active,
             created_at
           `,
           [
@@ -142,6 +144,104 @@ router.put(
       return res.status(500).json({
         message:
           "Error al actualizar el rol",
+      });
+    }
+  }
+);
+
+router.put(
+  "/users/:id/status",
+  verifyToken,
+  verifyAdmin,
+  async (
+    req: AuthRequest,
+    res
+  ) => {
+    try {
+      const userId =
+        Number(req.params.id);
+
+      const {
+        is_active,
+      } = req.body;
+
+      if (
+        Number.isNaN(userId)
+      ) {
+        return res.status(400).json({
+          message:
+            "ID de usuario inválido",
+        });
+      }
+
+      if (
+        typeof is_active !==
+        "boolean"
+      ) {
+        return res.status(400).json({
+          message:
+            "Estado de usuario inválido",
+        });
+      }
+
+      if (
+        req.user!.id === userId &&
+        is_active === false
+      ) {
+        return res.status(400).json({
+          message:
+            "No puedes bloquear tu propia cuenta",
+        });
+      }
+
+      const result =
+        await pool.query(
+          `
+          UPDATE users
+          SET is_active = $1
+          WHERE id = $2
+          RETURNING
+            id,
+            name,
+            email,
+            username,
+            role,
+            is_active,
+            created_at
+          `,
+          [
+            is_active,
+            userId,
+          ]
+        );
+
+      if (
+        result.rows.length === 0
+      ) {
+        return res.status(404).json({
+          message:
+            "Usuario no encontrado",
+        });
+      }
+
+      return res.json({
+        message:
+          is_active
+            ? "Usuario desbloqueado correctamente"
+            : "Usuario bloqueado correctamente",
+
+        user:
+          result.rows[0],
+      });
+    } catch (error) {
+      console.error(
+        "Error al actualizar estado:",
+        error
+      );
+
+      return res.status(500).json({
+        message:
+          "Error al actualizar el estado del usuario",
       });
     }
   }

@@ -16,8 +16,14 @@ interface AdminUser {
   email: string;
   username: string;
   role: string;
+  is_active: boolean;
   created_at: string;
 }
+
+type MessageType =
+  | "success"
+  | "error"
+  | "info";
 
 function Admin() {
   const [summary, setSummary] =
@@ -27,156 +33,388 @@ function Admin() {
     useState<AdminUser[]>([]);
 
   const [message, setMessage] =
-    useState("Cargando...");
+    useState("");
 
-  const [updatingUserId, setUpdatingUserId] =
+  const [
+    messageType,
+    setMessageType,
+  ] =
+    useState<MessageType>("info");
+
+  const [
+    updatingRoleId,
+    setUpdatingRoleId,
+  ] =
     useState<number | null>(null);
 
-  const loadAdmin = async () => {
-    try {
-      const token =
-        localStorage.getItem("token");
+  const [
+    updatingStatusId,
+    setUpdatingStatusId,
+  ] =
+    useState<number | null>(null);
 
-      const [
-        summaryResponse,
-        usersResponse,
-      ] = await Promise.all([
-        fetch(
-          "http://localhost:3000/api/admin/summary",
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        ),
-
-        fetch(
-          "http://localhost:3000/api/admin/users",
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        ),
-      ]);
-
-      const summaryData =
-        await summaryResponse.json();
-
-      const usersData =
-        await usersResponse.json();
-
-      if (!summaryResponse.ok) {
-        setMessage(
-          summaryData.message ||
-            "No se pudo cargar el resumen"
-        );
-
-        return;
-      }
-
-      if (!usersResponse.ok) {
-        setMessage(
-          usersData.message ||
-            "No se pudieron cargar los usuarios"
-        );
-
-        return;
-      }
-
-      setSummary(
-        summaryData
-      );
-
-      setUsers(
-        usersData.users || []
-      );
-
-      setMessage("");
-    } catch (error) {
-      console.error(error);
-
-      setMessage(
-        "No se pudo conectar con el servidor"
-      );
-    }
+  const showMessage = (
+    text: string,
+    type: MessageType
+  ) => {
+    setMessage(text);
+    setMessageType(type);
   };
+
+  useEffect(() => {
+    if (!message) {
+      return;
+    }
+
+    if (messageType === "info") {
+      return;
+    }
+
+    const timer =
+      window.setTimeout(() => {
+        setMessage("");
+      }, 3000);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [message, messageType]);
+
+  const loadAdmin =
+    async () => {
+      try {
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        const [
+          summaryResponse,
+          usersResponse,
+        ] =
+          await Promise.all([
+            fetch(
+              "http://localhost:3000/api/admin/summary",
+              {
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+              }
+            ),
+
+            fetch(
+              "http://localhost:3000/api/admin/users",
+              {
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+              }
+            ),
+          ]);
+
+        const summaryData =
+          await summaryResponse.json();
+
+        const usersData =
+          await usersResponse.json();
+
+        if (
+          !summaryResponse.ok
+        ) {
+          showMessage(
+            summaryData.message ||
+              "No se pudo cargar el resumen",
+            "error"
+          );
+
+          return;
+        }
+
+        if (
+          !usersResponse.ok
+        ) {
+          showMessage(
+            usersData.message ||
+              "No se pudieron cargar los usuarios",
+            "error"
+          );
+
+          return;
+        }
+
+        setSummary(
+          summaryData
+        );
+
+        setUsers(
+          usersData.users || []
+        );
+      } catch (error) {
+        console.error(error);
+
+        showMessage(
+          "No se pudo conectar con el servidor",
+          "error"
+        );
+      }
+    };
 
   useEffect(() => {
     loadAdmin();
   }, []);
 
-  const handleRoleChange = async (
-    userId: number,
-    newRole: string
-  ) => {
-    try {
-      const token =
-        localStorage.getItem("token");
-
-      setUpdatingUserId(userId);
-      setMessage("");
-
-      const response = await fetch(
-        `http://localhost:3000/api/admin/users/${userId}/role`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${token}`,
-          },
-
-          body: JSON.stringify({
-            role: newRole,
-          }),
-        }
-      );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-        setMessage(
-          data.message ||
-            "No se pudo actualizar el rol"
-        );
-
+  const handleRoleChange =
+    async (
+      userId: number,
+      newRole: string
+    ) => {
+      if (
+        updatingRoleId !== null
+      ) {
         return;
       }
 
-      setUsers(
-        users.map((user) =>
-          user.id === userId
-            ? {
-                ...user,
-                role:
-                  data.user.role,
-              }
-            : user
-        )
+      setUpdatingRoleId(
+        userId
       );
 
-      setMessage(
-        "Rol actualizado correctamente"
-      );
-    } catch (error) {
-      console.error(error);
+      try {
+        const token =
+          localStorage.getItem(
+            "token"
+          );
 
-      setMessage(
-        "No se pudo conectar con el servidor"
+        const response =
+          await fetch(
+            `http://localhost:3000/api/admin/users/${userId}/role`,
+            {
+              method: "PUT",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${token}`,
+              },
+
+              body:
+                JSON.stringify({
+                  role:
+                    newRole,
+                }),
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (
+          !response.ok
+        ) {
+          showMessage(
+            data.message ||
+              "No se pudo actualizar el rol",
+            "error"
+          );
+
+          return;
+        }
+
+        setUsers(
+          (
+            currentUsers
+          ) =>
+            currentUsers.map(
+              (user) =>
+                user.id ===
+                userId
+                  ? {
+                      ...user,
+
+                      role:
+                        data.user
+                          .role,
+                    }
+                  : user
+            )
+        );
+
+        showMessage(
+          "Rol actualizado correctamente",
+          "success"
+        );
+      } catch (error) {
+        console.error(error);
+
+        showMessage(
+          "No se pudo conectar con el servidor",
+          "error"
+        );
+      } finally {
+        window.setTimeout(
+          () => {
+            setUpdatingRoleId(
+              null
+            );
+          },
+          100
+        );
+      }
+    };
+
+  const handleStatusChange =
+    async (
+      userId: number,
+      currentStatus: boolean
+    ) => {
+      if (
+        updatingStatusId !== null
+      ) {
+        return;
+      }
+
+      const newStatus =
+        !currentStatus;
+
+      setUpdatingStatusId(
+        userId
       );
-    } finally {
-      setUpdatingUserId(null);
-    }
-  };
+
+      try {
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        const response =
+          await fetch(
+            `http://localhost:3000/api/admin/users/${userId}/status`,
+            {
+              method: "PUT",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${token}`,
+              },
+
+              body:
+                JSON.stringify({
+                  is_active:
+                    newStatus,
+                }),
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (
+          !response.ok
+        ) {
+          showMessage(
+            data.message ||
+              "No se pudo actualizar el estado",
+            "error"
+          );
+
+          return;
+        }
+
+        setUsers(
+          (
+            currentUsers
+          ) =>
+            currentUsers.map(
+              (user) =>
+                user.id ===
+                userId
+                  ? {
+                      ...user,
+
+                      is_active:
+                        data.user
+                          .is_active,
+                    }
+                  : user
+            )
+        );
+
+        showMessage(
+          newStatus
+            ? "Usuario desbloqueado correctamente"
+            : "Usuario bloqueado correctamente",
+          "success"
+        );
+      } catch (error) {
+        console.error(error);
+
+        showMessage(
+          "No se pudo conectar con el servidor",
+          "error"
+        );
+      } finally {
+        window.setTimeout(
+          () => {
+            setUpdatingStatusId(
+              null
+            );
+          },
+          100
+        );
+      }
+    };
 
   return (
     <main className="admin-page">
+      {message && (
+        <div
+          className={`admin-toast admin-toast-${messageType}`}
+        >
+          <div className="admin-toast-icon">
+            {messageType ===
+            "success"
+              ? "✓"
+              : messageType ===
+                  "error"
+                ? "!"
+                : "i"}
+          </div>
+
+          <div className="admin-toast-content">
+            <strong>
+              {messageType ===
+              "success"
+                ? "Listo"
+                : messageType ===
+                    "error"
+                  ? "Error"
+                  : "Información"}
+            </strong>
+
+            <span>
+              {message}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="admin-toast-close"
+            onClick={() =>
+              setMessage("")
+            }
+            aria-label="Cerrar notificación"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       <section className="admin-header">
         <div>
           <p className="admin-eyebrow">
@@ -188,17 +426,13 @@ function Admin() {
           </h1>
 
           <p className="admin-subtitle">
-            Consulta el estado general de la plataforma
-            y los usuarios registrados.
+            Consulta el estado
+            general de la
+            plataforma y los
+            usuarios registrados.
           </p>
         </div>
       </section>
-
-      {message && (
-        <div className="admin-message">
-          {message}
-        </div>
-      )}
 
       {summary && (
         <>
@@ -254,8 +488,9 @@ function Admin() {
                 </h2>
 
                 <p>
-                  Consulta y administra las cuentas
-                  creadas en la plataforma.
+                  Consulta y administra
+                  las cuentas creadas en
+                  la plataforma.
                 </p>
               </div>
             </div>
@@ -281,6 +516,14 @@ function Admin() {
                     </th>
 
                     <th>
+                      Estado
+                    </th>
+
+                    <th>
+                      Acción
+                    </th>
+
+                    <th>
                       Registro
                     </th>
                   </tr>
@@ -290,18 +533,27 @@ function Admin() {
                   {users.map(
                     (user) => (
                       <tr
-                        key={user.id}
+                        key={
+                          user.id
+                        }
                       >
                         <td>
-                          {user.name}
+                          {
+                            user.name
+                          }
                         </td>
 
                         <td>
-                          @{user.username}
+                          @
+                          {
+                            user.username
+                          }
                         </td>
 
                         <td>
-                          {user.email}
+                          {
+                            user.email
+                          }
                         </td>
 
                         <td>
@@ -311,15 +563,18 @@ function Admin() {
                               user.role
                             }
                             disabled={
-                              updatingUserId ===
-                              user.id
+                              updatingRoleId ===
+                                user.id ||
+                              updatingStatusId ===
+                                user.id
                             }
                             onChange={(
                               event
                             ) =>
                               handleRoleChange(
                                 user.id,
-                                event.target
+                                event
+                                  .target
                                   .value
                               )
                             }
@@ -332,6 +587,52 @@ function Admin() {
                               Administrador
                             </option>
                           </select>
+                        </td>
+
+                        <td>
+                          <span
+                            className={
+                              user.is_active
+                                ? "admin-status admin-status-active"
+                                : "admin-status admin-status-blocked"
+                            }
+                          >
+                            <span className="admin-status-dot" />
+
+                            {user.is_active
+                              ? "Activo"
+                              : "Bloqueado"}
+                          </span>
+                        </td>
+
+                        <td>
+                          <button
+                            type="button"
+                            className={
+                              user.is_active
+                                ? "admin-status-button admin-status-button-block"
+                                : "admin-status-button admin-status-button-unblock"
+                            }
+                            disabled={
+                              updatingStatusId ===
+                                user.id ||
+                              updatingRoleId ===
+                                user.id
+                            }
+                            onClick={() =>
+                              handleStatusChange(
+                                user.id,
+                                user.is_active
+                              )
+                            }
+                          >
+                            {updatingStatusId ===
+                            user.id
+                              ? "Procesando..."
+                              : user.is_active
+                                ? "Bloquear"
+                                : "Desbloquear"}
+                          </button>
                         </td>
 
                         <td>
