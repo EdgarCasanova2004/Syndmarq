@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 import { useParams } from "react-router-dom";
 import "../App.css";
 
@@ -139,6 +142,118 @@ function PublicPortfolio() {
     loadPortfolio();
   }, [username]);
 
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    const title =
+      `${data.user.name} | Portafolio profesional`;
+
+    const description =
+      data.user.bio?.trim() ||
+      data.user.profession?.trim() ||
+      `Conoce el portafolio profesional de ${data.user.name}.`;
+
+    document.title = title;
+
+    const setMetaTag = (
+      name: string,
+      content: string
+    ) => {
+      let meta =
+        document.querySelector(
+          `meta[name="${name}"]`
+        ) as HTMLMetaElement | null;
+
+      if (!meta) {
+        meta =
+          document.createElement(
+            "meta"
+          );
+
+        meta.setAttribute(
+          "name",
+          name
+        );
+
+        document.head.appendChild(
+          meta
+        );
+      }
+
+      meta.setAttribute(
+        "content",
+        content
+      );
+    };
+
+    const setPropertyTag = (
+      property: string,
+      content: string
+    ) => {
+      let meta =
+        document.querySelector(
+          `meta[property="${property}"]`
+        ) as HTMLMetaElement | null;
+
+      if (!meta) {
+        meta =
+          document.createElement(
+            "meta"
+          );
+
+        meta.setAttribute(
+          "property",
+          property
+        );
+
+        document.head.appendChild(
+          meta
+        );
+      }
+
+      meta.setAttribute(
+        "content",
+        content
+      );
+    };
+
+    setMetaTag(
+      "description",
+      description
+    );
+
+    setPropertyTag(
+      "og:title",
+      title
+    );
+
+    setPropertyTag(
+      "og:description",
+      description
+    );
+
+    setPropertyTag(
+      "og:type",
+      "profile"
+    );
+
+    setPropertyTag(
+      "og:url",
+      window.location.href
+    );
+
+    if (
+      data.user.profile_image_url
+    ) {
+      setPropertyTag(
+        "og:image",
+        data.user.profile_image_url
+      );
+    }
+  }, [data]);
+
   if (loading) {
     return (
       <main className="public-portfolio-page">
@@ -219,31 +334,33 @@ function PublicPortfolio() {
           </div>
 
           <div className="public-links">
-            {data.links.map((link) => (
-              <a
-                key={link.id}
-                href={link.url}
-                target="_blank"
-                rel="noreferrer"
-                className="public-link-card"
-              >
-                <div className="public-link-icon">
-                  {link.icon
-                    ? link.icon
-                        .charAt(0)
-                        .toUpperCase()
-                    : "L"}
-                </div>
+            {data.links.map(
+              (link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="public-link-card"
+                >
+                  <div className="public-link-icon">
+                    {link.icon
+                      ? link.icon
+                          .charAt(0)
+                          .toUpperCase()
+                      : "L"}
+                  </div>
 
-                <span>
-                  {link.title}
-                </span>
+                  <span>
+                    {link.title}
+                  </span>
 
-                <strong>
-                  →
-                </strong>
-              </a>
-            ))}
+                  <strong>
+                    →
+                  </strong>
+                </a>
+              )
+            )}
           </div>
         </section>
       )}

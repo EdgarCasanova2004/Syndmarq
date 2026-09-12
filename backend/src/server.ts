@@ -14,6 +14,7 @@ import designRoutes from "./routes/design.js";
 import statisticsRoutes from "./routes/statistics.js";
 import settingsRoutes from "./routes/settings.js";
 import uploadRoutes from "./routes/uploads.js";
+import adminRoutes from "./routes/admin.js";
 
 dotenv.config();
 
@@ -85,6 +86,11 @@ app.use(
 app.use(
   "/api/uploads",
   uploadRoutes
+);
+
+app.use(
+  "/api/admin",
+  adminRoutes
 );
 
 app.get("/", (_req, res) => {

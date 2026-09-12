@@ -16,6 +16,7 @@ import Design from "./pages/Design";
 import Statistics from "./pages/Statistics";
 import Settings from "./pages/Settings";
 import Share from "./pages/Share";
+import Admin from "./pages/Admin";
 
 function App() {
   return (
@@ -74,6 +75,11 @@ function App() {
         <Route
           path="/share"
           element={<Share />}
+        />
+
+        <Route
+          path="/admin"
+          element={<Admin />}
         />
 
         <Route
