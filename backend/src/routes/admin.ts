@@ -248,6 +248,155 @@ router.put(
 );
 
 router.get(
+  "/projects",
+  verifyToken,
+  verifyAdmin,
+  async (
+    _req: AuthRequest,
+    res
+  ) => {
+    try {
+      const result =
+        await pool.query(
+          `
+          SELECT
+            p.id,
+            p.user_id,
+            p.title,
+            p.description,
+            p.category_id,
+            p.image_url,
+            p.project_url,
+            p.is_featured,
+            p.is_active,
+            p.sort_order,
+            p.created_at,
+            p.updated_at,
+            u.name AS author_name,
+            u.username AS author_username,
+            c.name AS category_name
+          FROM projects p
+          INNER JOIN users u
+            ON p.user_id = u.id
+          LEFT JOIN categories c
+            ON p.category_id = c.id
+          ORDER BY p.created_at DESC
+          `
+        );
+
+      return res.json({
+        projects: result.rows,
+      });
+    } catch (error) {
+      console.error(
+        "Error al obtener proyectos:",
+        error
+      );
+
+      return res.status(500).json({
+        message:
+          "Error al obtener los proyectos",
+      });
+    }
+  }
+);
+
+router.put(
+  "/projects/:id/status",
+  verifyToken,
+  verifyAdmin,
+  async (
+    req: AuthRequest,
+    res
+  ) => {
+    try {
+      const projectId =
+        Number(req.params.id);
+
+      const {
+        is_active,
+      } = req.body;
+
+      if (
+        Number.isNaN(projectId)
+      ) {
+        return res.status(400).json({
+          message:
+            "ID de proyecto inválido",
+        });
+      }
+
+      if (
+        typeof is_active !==
+        "boolean"
+      ) {
+        return res.status(400).json({
+          message:
+            "Estado de proyecto inválido",
+        });
+      }
+
+      const result =
+        await pool.query(
+          `
+          UPDATE projects
+          SET
+            is_active = $1,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $2
+          RETURNING
+            id,
+            user_id,
+            title,
+            description,
+            category_id,
+            image_url,
+            project_url,
+            is_featured,
+            is_active,
+            sort_order,
+            created_at,
+            updated_at
+          `,
+          [
+            is_active,
+            projectId,
+          ]
+        );
+
+      if (
+        result.rows.length === 0
+      ) {
+        return res.status(404).json({
+          message:
+            "Proyecto no encontrado",
+        });
+      }
+
+      return res.json({
+        message:
+          is_active
+            ? "Proyecto habilitado correctamente"
+            : "Proyecto ocultado correctamente",
+
+        project:
+          result.rows[0],
+      });
+    } catch (error) {
+      console.error(
+        "Error al actualizar proyecto:",
+        error
+      );
+
+      return res.status(500).json({
+        message:
+          "Error al actualizar el estado del proyecto",
+      });
+    }
+  }
+);
+
+router.get(
   "/summary",
   verifyToken,
   verifyAdmin,

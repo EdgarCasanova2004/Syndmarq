@@ -20,6 +20,24 @@ interface AdminUser {
   created_at: string;
 }
 
+interface AdminProject {
+  id: number;
+  user_id: number;
+  title: string;
+  description: string | null;
+  category_id: number | null;
+  image_url: string | null;
+  project_url: string | null;
+  is_featured: boolean;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  author_name: string;
+  author_username: string;
+  category_name: string | null;
+}
+
 type MessageType =
   | "success"
   | "error"
@@ -31,6 +49,9 @@ function Admin() {
 
   const [users, setUsers] =
     useState<AdminUser[]>([]);
+
+  const [projects, setProjects] =
+    useState<AdminProject[]>([]);
 
   const [message, setMessage] =
     useState("");
@@ -50,6 +71,12 @@ function Admin() {
   const [
     updatingStatusId,
     setUpdatingStatusId,
+  ] =
+    useState<number | null>(null);
+
+  const [
+    updatingProjectId,
+    setUpdatingProjectId,
   ] =
     useState<number | null>(null);
 
@@ -91,6 +118,7 @@ function Admin() {
         const [
           summaryResponse,
           usersResponse,
+          projectsResponse,
         ] =
           await Promise.all([
             fetch(
@@ -112,6 +140,16 @@ function Admin() {
                 },
               }
             ),
+
+            fetch(
+              "http://localhost:3000/api/admin/projects",
+              {
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+              }
+            ),
           ]);
 
         const summaryData =
@@ -120,9 +158,10 @@ function Admin() {
         const usersData =
           await usersResponse.json();
 
-        if (
-          !summaryResponse.ok
-        ) {
+        const projectsData =
+          await projectsResponse.json();
+
+        if (!summaryResponse.ok) {
           showMessage(
             summaryData.message ||
               "No se pudo cargar el resumen",
@@ -132,9 +171,7 @@ function Admin() {
           return;
         }
 
-        if (
-          !usersResponse.ok
-        ) {
+        if (!usersResponse.ok) {
           showMessage(
             usersData.message ||
               "No se pudieron cargar los usuarios",
@@ -144,12 +181,24 @@ function Admin() {
           return;
         }
 
-        setSummary(
-          summaryData
-        );
+        if (!projectsResponse.ok) {
+          showMessage(
+            projectsData.message ||
+              "No se pudieron cargar los proyectos",
+            "error"
+          );
+
+          return;
+        }
+
+        setSummary(summaryData);
 
         setUsers(
           usersData.users || []
+        );
+
+        setProjects(
+          projectsData.projects || []
         );
       } catch (error) {
         console.error(error);
@@ -211,9 +260,7 @@ function Admin() {
         const data =
           await response.json();
 
-        if (
-          !response.ok
-        ) {
+        if (!response.ok) {
           showMessage(
             data.message ||
               "No se pudo actualizar el rol",
@@ -224,9 +271,7 @@ function Admin() {
         }
 
         setUsers(
-          (
-            currentUsers
-          ) =>
+          (currentUsers) =>
             currentUsers.map(
               (user) =>
                 user.id ===
@@ -314,9 +359,7 @@ function Admin() {
         const data =
           await response.json();
 
-        if (
-          !response.ok
-        ) {
+        if (!response.ok) {
           showMessage(
             data.message ||
               "No se pudo actualizar el estado",
@@ -327,9 +370,7 @@ function Admin() {
         }
 
         setUsers(
-          (
-            currentUsers
-          ) =>
+          (currentUsers) =>
             currentUsers.map(
               (user) =>
                 user.id ===
@@ -362,6 +403,111 @@ function Admin() {
         window.setTimeout(
           () => {
             setUpdatingStatusId(
+              null
+            );
+          },
+          100
+        );
+      }
+    };
+
+  const handleProjectStatusChange =
+    async (
+      projectId: number,
+      currentStatus: boolean
+    ) => {
+      if (
+        updatingProjectId !== null
+      ) {
+        return;
+      }
+
+      const newStatus =
+        !currentStatus;
+
+      setUpdatingProjectId(
+        projectId
+      );
+
+      try {
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        const response =
+          await fetch(
+            `http://localhost:3000/api/admin/projects/${projectId}/status`,
+            {
+              method: "PUT",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${token}`,
+              },
+
+              body:
+                JSON.stringify({
+                  is_active:
+                    newStatus,
+                }),
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+          showMessage(
+            data.message ||
+              "No se pudo actualizar el proyecto",
+            "error"
+          );
+
+          return;
+        }
+
+        setProjects(
+          (currentProjects) =>
+            currentProjects.map(
+              (project) =>
+                project.id ===
+                projectId
+                  ? {
+                      ...project,
+
+                      is_active:
+                        data.project
+                          .is_active,
+
+                      updated_at:
+                        data.project
+                          .updated_at,
+                    }
+                  : project
+            )
+        );
+
+        showMessage(
+          newStatus
+            ? "Proyecto habilitado correctamente"
+            : "Proyecto ocultado correctamente",
+          "success"
+        );
+      } catch (error) {
+        console.error(error);
+
+        showMessage(
+          "No se pudo conectar con el servidor",
+          "error"
+        );
+      } finally {
+        window.setTimeout(
+          () => {
+            setUpdatingProjectId(
               null
             );
           },
@@ -426,10 +572,9 @@ function Admin() {
           </h1>
 
           <p className="admin-subtitle">
-            Consulta el estado
-            general de la
-            plataforma y los
-            usuarios registrados.
+            Consulta el estado general
+            de la plataforma y administra
+            usuarios y proyectos.
           </p>
         </div>
       </section>
@@ -643,6 +788,161 @@ function Admin() {
                           )}
                         </td>
                       </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="admin-users-section">
+            <div className="admin-section-header">
+              <div>
+                <h2>
+                  Moderación de proyectos
+                </h2>
+
+                <p>
+                  Revisa los proyectos
+                  creados por los usuarios
+                  y controla su visibilidad.
+                </p>
+              </div>
+            </div>
+
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>
+                      Proyecto
+                    </th>
+
+                    <th>
+                      Autor
+                    </th>
+
+                    <th>
+                      Categoría
+                    </th>
+
+                    <th>
+                      Estado
+                    </th>
+
+                    <th>
+                      Acción
+                    </th>
+
+                    <th>
+                      Creado
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {projects.length ===
+                  0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        style={{
+                          textAlign:
+                            "center",
+                        }}
+                      >
+                        No hay proyectos registrados.
+                      </td>
+                    </tr>
+                  ) : (
+                    projects.map(
+                      (project) => (
+                        <tr
+                          key={
+                            project.id
+                          }
+                        >
+                          <td>
+                            <strong>
+                              {
+                                project.title
+                              }
+                            </strong>
+                          </td>
+
+                          <td>
+                            <div>
+                              {
+                                project.author_name
+                              }
+                            </div>
+
+                            <small>
+                              @
+                              {
+                                project.author_username
+                              }
+                            </small>
+                          </td>
+
+                          <td>
+                            {project.category_name ||
+                              "Sin categoría"}
+                          </td>
+
+                          <td>
+                            <span
+                              className={
+                                project.is_active
+                                  ? "admin-status admin-status-active"
+                                  : "admin-status admin-status-blocked"
+                              }
+                            >
+                              <span className="admin-status-dot" />
+
+                              {project.is_active
+                                ? "Visible"
+                                : "Oculto"}
+                            </span>
+                          </td>
+
+                          <td>
+                            <button
+                              type="button"
+                              className={
+                                project.is_active
+                                  ? "admin-status-button admin-status-button-block"
+                                  : "admin-status-button admin-status-button-unblock"
+                              }
+                              disabled={
+                                updatingProjectId ===
+                                project.id
+                              }
+                              onClick={() =>
+                                handleProjectStatusChange(
+                                  project.id,
+                                  project.is_active
+                                )
+                              }
+                            >
+                              {updatingProjectId ===
+                              project.id
+                                ? "Procesando..."
+                                : project.is_active
+                                  ? "Ocultar"
+                                  : "Mostrar"}
+                            </button>
+                          </td>
+
+                          <td>
+                            {new Date(
+                              project.created_at
+                            ).toLocaleDateString(
+                              "es-MX"
+                            )}
+                          </td>
+                        </tr>
+                      )
                     )
                   )}
                 </tbody>
