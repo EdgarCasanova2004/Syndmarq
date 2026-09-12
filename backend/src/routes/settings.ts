@@ -1,93 +1,73 @@
 import { Router } from "express";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import pool from "../db.js";
+import {
+  verifyToken,
+} from "../middleware/auth.js";
+import type {
+  AuthRequest,
+} from "../middleware/auth.js";
 
 const router = Router();
 
-const getUserIdFromToken = (
-  authorization?: string
-) => {
-  if (!authorization) {
-    throw new Error("Token no proporcionado");
-  }
+router.get(
+  "/",
+  verifyToken,
+  async (
+    req: AuthRequest,
+    res
+  ) => {
+    try {
+      const userId =
+        req.user!.id;
 
-  const parts =
-    authorization.split(" ");
+      const result =
+        await pool.query(
+          `
+          SELECT
+            id,
+            name,
+            email,
+            username
+          FROM users
+          WHERE id = $1
+          `,
+          [userId]
+        );
 
-  if (
-    parts.length !== 2 ||
-    parts[0] !== "Bearer" ||
-    !parts[1]
-  ) {
-    throw new Error("Token no proporcionado");
-  }
-
-  const decoded = jwt.verify(
-    parts[1],
-    process.env.JWT_SECRET as string
-  ) as {
-    id: number;
-  };
-
-  return decoded.id;
-};
-
-router.get("/", async (req, res) => {
-  try {
-    const userId =
-      getUserIdFromToken(
-        req.headers.authorization
-      );
-
-    const result =
-      await pool.query(
-        `
-        SELECT
-          id,
-          name,
-          email,
-          username
-        FROM users
-        WHERE id = $1
-        `,
-        [userId]
-      );
-
-    if (
-      result.rows.length === 0
-    ) {
-      return res
-        .status(404)
-        .json({
+      if (
+        result.rows.length === 0
+      ) {
+        return res.status(404).json({
           message:
             "Usuario no encontrado",
         });
-    }
+      }
 
-    return res.json({
-      user: result.rows[0],
-    });
-  } catch (error) {
-    console.error(error);
-
-    return res
-      .status(401)
-      .json({
-        message:
-          "Token inválido o expirado",
+      return res.json({
+        user: result.rows[0],
       });
+    } catch (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        message:
+          "Error al obtener la configuración de la cuenta",
+      });
+    }
   }
-});
+);
 
 router.put(
   "/account",
-  async (req, res) => {
+  verifyToken,
+  async (
+    req: AuthRequest,
+    res
+  ) => {
     try {
       const userId =
-        getUserIdFromToken(
-          req.headers.authorization
-        );
+        req.user!.id;
 
       const {
         name,
@@ -100,12 +80,30 @@ router.put(
         !email ||
         !username
       ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Todos los campos son obligatorios",
-          });
+        return res.status(400).json({
+          message:
+            "Todos los campos son obligatorios",
+        });
+      }
+
+      const cleanName =
+        name.trim();
+
+      const cleanEmail =
+        email.trim();
+
+      const cleanUsername =
+        username.trim();
+
+      if (
+        !cleanName ||
+        !cleanEmail ||
+        !cleanUsername
+      ) {
+        return res.status(400).json({
+          message:
+            "Todos los campos son obligatorios",
+        });
       }
 
       const emailExists =
@@ -117,18 +115,19 @@ router.put(
             email = $1
             AND id <> $2
           `,
-          [email, userId]
+          [
+            cleanEmail,
+            userId,
+          ]
         );
 
       if (
         emailExists.rows.length > 0
       ) {
-        return res
-          .status(409)
-          .json({
-            message:
-              "El correo ya está registrado",
-          });
+        return res.status(409).json({
+          message:
+            "El correo ya está registrado",
+        });
       }
 
       const usernameExists =
@@ -140,19 +139,20 @@ router.put(
             username = $1
             AND id <> $2
           `,
-          [username, userId]
+          [
+            cleanUsername,
+            userId,
+          ]
         );
 
       if (
         usernameExists.rows.length >
         0
       ) {
-        return res
-          .status(409)
-          .json({
-            message:
-              "El nombre de usuario ya está en uso",
-          });
+        return res.status(409).json({
+          message:
+            "El nombre de usuario ya está en uso",
+        });
       }
 
       const result =
@@ -171,12 +171,21 @@ router.put(
             username
           `,
           [
-            name,
-            email,
-            username,
+            cleanName,
+            cleanEmail,
+            cleanUsername,
             userId,
           ]
         );
+
+      if (
+        result.rows.length === 0
+      ) {
+        return res.status(404).json({
+          message:
+            "Usuario no encontrado",
+        });
+      }
 
       return res.json({
         message:
@@ -186,24 +195,24 @@ router.put(
     } catch (error) {
       console.error(error);
 
-      return res
-        .status(401)
-        .json({
-          message:
-            "Token inválido o expirado",
-        });
+      return res.status(500).json({
+        message:
+          "Error al actualizar la cuenta",
+      });
     }
   }
 );
 
 router.put(
   "/password",
-  async (req, res) => {
+  verifyToken,
+  async (
+    req: AuthRequest,
+    res
+  ) => {
     try {
       const userId =
-        getUserIdFromToken(
-          req.headers.authorization
-        );
+        req.user!.id;
 
       const {
         currentPassword,
@@ -214,23 +223,19 @@ router.put(
         !currentPassword ||
         !newPassword
       ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Debes completar ambos campos",
-          });
+        return res.status(400).json({
+          message:
+            "Debes completar ambos campos",
+        });
       }
 
       if (
         newPassword.length < 8
       ) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "La nueva contraseña debe tener al menos 8 caracteres",
-          });
+        return res.status(400).json({
+          message:
+            "La nueva contraseña debe tener al menos 8 caracteres",
+        });
       }
 
       const result =
@@ -246,12 +251,10 @@ router.put(
       if (
         result.rows.length === 0
       ) {
-        return res
-          .status(404)
-          .json({
-            message:
-              "Usuario no encontrado",
-          });
+        return res.status(404).json({
+          message:
+            "Usuario no encontrado",
+        });
       }
 
       const passwordMatches =
@@ -262,12 +265,10 @@ router.put(
         );
 
       if (!passwordMatches) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "La contraseña actual es incorrecta",
-          });
+        return res.status(400).json({
+          message:
+            "La contraseña actual es incorrecta",
+        });
       }
 
       const newPasswordHash =
@@ -295,12 +296,10 @@ router.put(
     } catch (error) {
       console.error(error);
 
-      return res
-        .status(401)
-        .json({
-          message:
-            "Token inválido o expirado",
-        });
+      return res.status(500).json({
+        message:
+          "Error al actualizar la contraseña",
+      });
     }
   }
 );

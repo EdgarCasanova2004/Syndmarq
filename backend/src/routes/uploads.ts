@@ -2,8 +2,13 @@ import { Router } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import jwt from "jsonwebtoken";
 import { fileURLToPath } from "url";
+import {
+  verifyToken,
+} from "../middleware/auth.js";
+import type {
+  AuthRequest,
+} from "../middleware/auth.js";
 
 const router = Router();
 
@@ -43,7 +48,7 @@ const storage =
       const extension =
         path.extname(
           file.originalname
-        );
+        ).toLowerCase();
 
       const uniqueName =
         `${Date.now()}-${Math.round(
@@ -90,60 +95,14 @@ const upload = multer({
   },
 });
 
-const verifyToken = (
-  req: any,
-  res: any,
-  next: any
-) => {
-  try {
-    const authHeader =
-      req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json({
-        message:
-          "Token no proporcionado",
-      });
-    }
-
-    const parts =
-      authHeader.split(" ");
-
-    if (
-      parts.length !== 2 ||
-      parts[0] !== "Bearer"
-    ) {
-      return res.status(401).json({
-        message:
-          "Formato de token inválido",
-      });
-    }
-
-    const token =
-      parts[1];
-
-    const decoded =
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET as string
-      );
-
-    req.user = decoded;
-
-    next();
-  } catch (error) {
-    return res.status(401).json({
-      message:
-        "Token inválido o expirado",
-    });
-  }
-};
-
 router.post(
   "/image",
   verifyToken,
   upload.single("image"),
-  (req, res) => {
+  (
+    req: AuthRequest,
+    res
+  ) => {
     if (!req.file) {
       return res.status(400).json({
         message:
