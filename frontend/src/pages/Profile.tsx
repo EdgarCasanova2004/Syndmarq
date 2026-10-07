@@ -1332,7 +1332,7 @@ function Profile() {
 
       try {
 
-        const response = await fetch("http://localhost:3000/api/profile", {
+        const response = await fetch("https://portavia-api.onrender.com/api/profile", {
 
           method: "GET",
 
@@ -1573,7 +1573,7 @@ function Profile() {
 
     formData.append("image", profileImageFile);
 
-    const response = await fetch("http://localhost:3000/api/uploads/image", {
+    const response = await fetch("https://portavia-api.onrender.com/api/uploads/image", {
 
       method: "POST",
 
@@ -1623,7 +1623,7 @@ function Profile() {
 
       const uploadedImageUrl = await uploadProfileImage();
 
-      const response = await fetch("http://localhost:3000/api/profile", {
+      const response = await fetch("https://portavia-api.onrender.com/api/profile", {
 
         method: "PUT",
 

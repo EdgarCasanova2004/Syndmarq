@@ -767,10 +767,10 @@ function Dashboard() {
           linksResponse,
           statisticsResponse,
         ] = await Promise.all([
-          fetch("http://localhost:3000/api/profile", { headers }),
-          fetch("http://localhost:3000/api/projects", { headers }),
-          fetch("http://localhost:3000/api/links", { headers }),
-          fetch("http://localhost:3000/api/statistics", { headers }),
+          fetch("https://portavia-api.onrender.com/api/profile", { headers }),
+          fetch("https://portavia-api.onrender.com/api/projects", { headers }),
+          fetch("https://portavia-api.onrender.com/api/links", { headers }),
+          fetch("https://portavia-api.onrender.com/api/statistics", { headers }),
         ]);
 
         const responses = [

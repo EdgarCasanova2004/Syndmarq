@@ -20,7 +20,7 @@ interface LinkItem {
 
 }
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://portavia-api.onrender.com";
 
 const getUrlHost = (rawUrl: string) => {
   try {

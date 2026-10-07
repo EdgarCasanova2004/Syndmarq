@@ -238,7 +238,7 @@ function Admin() {
         ] =
           await Promise.all([
             fetch(
-              "http://localhost:3000/api/admin/summary",
+              "https://portavia-api.onrender.com/api/admin/summary",
               {
                 headers: {
                   Authorization:
@@ -248,7 +248,7 @@ function Admin() {
             ),
 
             fetch(
-              "http://localhost:3000/api/admin/users",
+              "https://portavia-api.onrender.com/api/admin/users",
               {
                 headers: {
                   Authorization:
@@ -258,7 +258,7 @@ function Admin() {
             ),
 
             fetch(
-              "http://localhost:3000/api/admin/projects",
+              "https://portavia-api.onrender.com/api/admin/projects",
               {
                 headers: {
                   Authorization:
@@ -268,7 +268,7 @@ function Admin() {
             ),
 
             fetch(
-              "http://localhost:3000/api/admin/categories",
+              "https://portavia-api.onrender.com/api/admin/categories",
               {
                 headers: {
                   Authorization:
@@ -434,7 +434,7 @@ function Admin() {
 
         const response =
           await fetch(
-            `http://localhost:3000/api/admin/users/${userId}/role`,
+            `https://portavia-api.onrender.com/api/admin/users/${userId}/role`,
             {
               method: "PUT",
 
@@ -534,7 +534,7 @@ function Admin() {
 
         const response =
           await fetch(
-            `http://localhost:3000/api/admin/users/${userId}/status`,
+            `https://portavia-api.onrender.com/api/admin/users/${userId}/status`,
             {
               method: "PUT",
 
@@ -641,7 +641,7 @@ function Admin() {
 
         const response =
           await fetch(
-            `http://localhost:3000/api/admin/users/${userId}/portfolio`,
+            `https://portavia-api.onrender.com/api/admin/users/${userId}/portfolio`,
             {
               method: "PUT",
 
@@ -772,7 +772,7 @@ function Admin() {
 
         const response =
           await fetch(
-            `http://localhost:3000/api/admin/users/${user.id}`,
+            `https://portavia-api.onrender.com/api/admin/users/${user.id}`,
             {
               method: "DELETE",
 
@@ -851,7 +851,7 @@ function Admin() {
 
         const response =
           await fetch(
-            `http://localhost:3000/api/admin/projects/${projectId}/status`,
+            `https://portavia-api.onrender.com/api/admin/projects/${projectId}/status`,
             {
               method: "PUT",
 
@@ -983,8 +983,8 @@ function Admin() {
 
         const url =
           isEditing
-            ? `http://localhost:3000/api/admin/categories/${editingCategoryId}`
-            : "http://localhost:3000/api/admin/categories";
+            ? `https://portavia-api.onrender.com/api/admin/categories/${editingCategoryId}`
+            : "https://portavia-api.onrender.com/api/admin/categories";
 
         const response =
           await fetch(
@@ -1128,7 +1128,7 @@ function Admin() {
 
         const response =
           await fetch(
-            `http://localhost:3000/api/admin/categories/${categoryId}/status`,
+            `https://portavia-api.onrender.com/api/admin/categories/${categoryId}/status`,
             {
               method: "PUT",
 
@@ -1248,7 +1248,7 @@ function Admin() {
 
         const response =
           await fetch(
-            `http://localhost:3000/api/admin/categories/${category.id}`,
+            `https://portavia-api.onrender.com/api/admin/categories/${category.id}`,
             {
               method: "DELETE",
               headers: {

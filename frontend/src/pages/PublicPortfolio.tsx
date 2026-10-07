@@ -60,7 +60,7 @@ function PublicPortfolio() {
 
       try {
         const response = await fetch(
-          `http://localhost:3000/api/public/${username}`
+          `https://portavia-api.onrender.com/api/public/${username}`
         );
 
         const result =
@@ -106,7 +106,7 @@ function PublicPortfolio() {
           try {
             const visitResponse =
               await fetch(
-                `http://localhost:3000/api/public/${username}/visit`,
+                `https://portavia-api.onrender.com/api/public/${username}/visit`,
                 {
                   method: "POST",
                 }

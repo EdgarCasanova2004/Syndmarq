@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://portavia-api.onrender.com";
 
 const settingsStyles = `
   .pv-settings {
