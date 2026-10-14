@@ -1,7 +1,7 @@
 import { useState, type CSSProperties, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../App.css";
-import registerBackdrop from "../assets/register-bg.png";
+import registerBackdrop from "../assets/register-bg.webp";
 
 const registerStyles = `
   .pv-reg, .pv-reg * { box-sizing: border-box; }

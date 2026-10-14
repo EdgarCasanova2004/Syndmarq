@@ -1,7 +1,7 @@
 import { useState, type CSSProperties, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../App.css";
-import loginBackdrop from "../assets/login-office-4k.jpg";
+import loginBackdrop from "../assets/login-office-4k.webp";
 
 const styles = `
   .pv-auth, .pv-auth * { box-sizing: border-box; }
