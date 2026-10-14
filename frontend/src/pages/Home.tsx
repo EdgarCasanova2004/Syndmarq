@@ -915,9 +915,9 @@ export default function Home() {
 <p>Portavia parte de lo que ya tienes y te ayuda a convertirlo en una presencia profesional, clara y lista para compartir.</p>
 </div>
 <ol className="how-steps">
-<li className="how-step"><span className="how-number">01</span><div><h3>Crea tu espacio</h3><p>Elige tu username y empieza con tu experiencia, habilidades y forma de contacto.</p></div><span className="how-check" aria-label="Completado"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m7.5 12.2 3 3 6-6.4"/></svg></span></li>
-<li className="how-step"><span className="how-number">02</span><div><h3>Cuenta lo que has hecho</h3><p>Agrega proyectos con contexto, imágenes y enlaces que expliquen tu trabajo.</p></div><span className="how-check" aria-label="Completado"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m7.5 12.2 3 3 6-6.4"/></svg></span></li>
-<li className="how-step"><span className="how-number">03</span><div><h3>Llévalo contigo</h3><p>Comparte una URL o QR cuando surja una entrevista, colaboración u oportunidad.</p></div><span className="how-check" aria-label="Completado"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m7.5 12.2 3 3 6-6.4"/></svg></span></li>
+<li className="how-step"><span className="how-number">01</span><div><h3>Crea tu espacio</h3><p>Elige tu username y empieza con tu experiencia, habilidades y forma de contacto.</p></div><span className="how-check" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m7.5 12.2 3 3 6-6.4"/></svg></span></li>
+<li className="how-step"><span className="how-number">02</span><div><h3>Cuenta lo que has hecho</h3><p>Agrega proyectos con contexto, imágenes y enlaces que expliquen tu trabajo.</p></div><span className="how-check" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m7.5 12.2 3 3 6-6.4"/></svg></span></li>
+<li className="how-step"><span className="how-number">03</span><div><h3>Llévalo contigo</h3><p>Comparte una URL o QR cuando surja una entrevista, colaboración u oportunidad.</p></div><span className="how-check" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m7.5 12.2 3 3 6-6.4"/></svg></span></li>
 </ol>
 </div>
 </div>
