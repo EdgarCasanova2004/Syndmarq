@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../App.css";
 import registerBackdrop from "../assets/register-bg.webp";
@@ -546,6 +546,16 @@ function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  useEffect(() => {
+    if (!isSuccess || !message) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setMessage("");
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isSuccess, message]);
+
   const clearFeedback = () => {
     setMessage("");
     setIsSuccess(false);
@@ -742,9 +752,9 @@ function Register() {
                   className={`pv-reg__alert ${isSuccess ? "pv-reg__alert--success" : ""}`}
                   role="alert"
                 >
-                  <span className="pv-reg__alert-icon" aria-hidden="true">
-                    {isSuccess ? "✓" : "i"}
-                  </span>
+                  {!isSuccess && (
+                    <span className="pv-reg__alert-icon" aria-hidden="true">i</span>
+                  )}
                   <div>
                     {isSuccess && <strong>Cuenta creada</strong>}
                     <p>{message}</p>
